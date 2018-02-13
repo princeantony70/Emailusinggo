@@ -8,10 +8,16 @@ import (
       _ "github.com/go-sql-driver/mysql"
        "database/sql"
 
+
 )
 
 var appdatabase *sql.DB
 var err error
+var arr int
+
+type Tag struct {
+	ID   int    `json:"id"`
+}
 
 type Questions struct {
   Question struct {
@@ -34,26 +40,35 @@ type Questions struct {
 
 
 func insertInDatabase(data Questions) error  {
-
   for i:=0;i<=1;i++{
+      switch i {
+      case 0:
+      _, err = appdatabase.Exec("INSERT INTO array(parent_id,name, section, rollno,age) VALUES(?,?,?,?,?)",data.Question.Parent_id,data.Question.Name,data.Question.Section , data.Question.Rollno,data.Question.Age)
+      results, err := appdatabase.Query("SELECT LAST_INSERT_ID()")
+      if err != nil {
+       panic(err.Error()) // proper error handling instead of panic in your app
+     	}
 
-     switch i {
-     case 0:
-       _, err = appdatabase.Exec("INSERT INTO array(parent_id,name, section, rollno,age) VALUES(?,?,?,?,?)",data.Question.Parent_id,data.Question.Name,data.Question.Section , data.Question.Rollno,data.Question.Age)
+      for results.Next() {
+      var tag Tag
+       	// for each row, scan the result into our tag composite object
+       err = results.Scan(&tag.ID)
+       if err != nil {
+       panic(err.Error()) // proper error handling instead of panic in your app
+       }
+      // and then print out the tag's Name attribute
+      arr=tag.ID
+     	 }
 
       case 1:
-
       for i:=0;i<=1;i++{
-      _, err = appdatabase.Exec("INSERT INTO array(parent_id,name, section, rollno,age) VALUES(?,?,?,?,?)",data.Options[i].Parent_id,data.Options[i].Name ,data.Options[i].Section,data.Options[i].Rollno,data.Options[i].Age)
+      _, err = appdatabase.Exec("INSERT INTO array(parent_id,name, section, rollno,age) VALUES(?,?,?,?,?)",arr,data.Options[i].Name ,data.Options[i].Section,data.Options[i].Rollno,data.Options[i].Age)
+
    }
  }
 }
 
-
-
-
 return err
-
 }
 
 
@@ -88,7 +103,9 @@ func userAddHandler(w http.ResponseWriter, r *http.Request) {
               return
        }
 
-       w.Write([]byte(`{"code ":"success"}`))
+    w.Write([]byte(`{"code ":"success"}`))
+    fmt.Println(k)
+
 }
 
 
@@ -106,10 +123,5 @@ if err !=nil{
 
 func main() {
        http.HandleFunc("/add", userAddHandler)
-       http.ListenAndServe(":6023", nil)
+       http.ListenAndServe(":6031", nil)
 }
-// 
-// func main() {
-//        http.HandleFunc("/add", userAddHandler)
-//        http.ListenAndServe(":6023", nil)
-// }
