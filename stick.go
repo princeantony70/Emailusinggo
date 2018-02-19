@@ -40,6 +40,14 @@ type Questions struct {
 
 
 func insertInDatabase(data Questions) error  {
+
+
+  if len(data.Options) > 0{
+    fmt.Println(data.Options)
+  }else{
+    fmt.Println(data.Question)
+  }
+
   for i:=0;i<=1;i++{
       switch i {
       case 0:
@@ -58,6 +66,7 @@ func insertInDatabase(data Questions) error  {
        }
       // and then print out the tag's Name attribute
       arr=tag.ID
+      fmt.Println(arr)
      	 }
 
       case 1:
@@ -123,5 +132,5 @@ if err !=nil{
 
 func main() {
        http.HandleFunc("/add", userAddHandler)
-       http.ListenAndServe(":6031", nil)
+       http.ListenAndServe(":7071", nil)
 }

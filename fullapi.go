@@ -16,6 +16,7 @@ var arr int
 
 type Tag struct {
   ID   int    `json:"id"`
+
 }
 
 type Questions struct {
@@ -61,39 +62,41 @@ type Questions struct {
 
 func insertInDatabase(data Questions) error  {
 
-  zeroOptions := data.Options{}
-  zeroValidation := data.Vaidation{}
-
-if (data.Options ==  zeroOptions) && (data.Validation == zeroValidation) {
-
-_, err= appdatabase.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", data.Question.Name ,data.Question.Section , data.Question.Position,data.Question.Title,data.Question.TitleSpanish,data.Question.SubmitedValue,data.Question.SpanishSubmitedValue,data.Question.Des,data.Question.Ans,data.Question.ViewType,data.Question.ParentID,data.Question.IsRequired,data.Question.IsSubmitField,data.Question.IsActive)
-
-}else if(data.Validation== zeroValidation){
-
-_, err= appdatabase.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", data.Question.Name ,data.Question.Section , data.Question.Position,data.Question.Title,data.Question.TitleSpanish,data.Question.SubmitedValue,data.Question.SpanishSubmitedValue,data.Question.Des,data.Question.Ans,data.Question.ViewType,data.Question.ParentID,data.Question.IsRequired,data.Question.IsSubmitField,data.Question.IsActive)
-results, err := appdatabase.Query("SELECT LAST_INSERT_ID()")
-if err != nil {
-panic(err.Error())
-}
-for results.Next() {
-var tag Tag
-err = results.Scan(&tag.ID)
-if err != nil {
-panic(err.Error())
-}
-arr=tag.ID
-}
-for i:=0;i<=1;i++{
-_, err = appdatabase.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?, ?, ?,?,?,?,?,?,?,?,?,?,?,?)",data.Options[i].Name ,data.Options[i].Section , data.Options[i].Position,data.Options[i].Title,data.Options[i].TitleSpanish,data.Options[i].SubmitedValue,data.Options[i].SpanishSubmitedValue,data.Options[i].Des,data.Options[i].Ans,data.Options[i].ViewType,arr,data.Options[i].IsRequired,data.Options[i].IsSubmitField,data.Options[i].IsActive)
-}
-
-}else {
-
-_, err= appdatabase.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", data.Question.Name ,data.Question.Section , data.Question.Position,data.Question.Title,data.Question.TitleSpanish,data.Question.SubmitedValue,data.Question.SpanishSubmitedValue,data.Question.Des,data.Question.Ans,data.Question.ViewType,data.Question.ParentID,data.Question.IsRequired,data.Question.IsSubmitField,data.Question.IsActive)
-_, err = appdatabase.Exec("INSERT INTO input_types(messgae,messageSpanish,regx,format) VALUES(?,?,?,?)",data.Validation.Messgae,data.Validation.MessageSpanish,data.Validation.Regx,data.Validation.Format)
-
-}
-
+  //zeroOptions := data.Options{}
+  //zeroValidation := data.Vaidation{}
+fmt.Println("hello")
+// if len(data.Options > 0) {
+//
+// _, err= appdatabase.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", data.Question.Name ,data.Question.Section , data.Question.Position,data.Question.Title,data.Question.TitleSpanish,data.Question.SubmitedValue,data.Question.SpanishSubmitedValue,data.Question.Des,data.Question.Ans,data.Question.ViewType,data.Question.ParentID,data.Question.IsRequired,data.Question.IsSubmitField,data.Question.IsActive)
+//
+// }else{
+//  // if(data.Validation ==  ){
+//
+// _, err= appdatabase.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", data.Question.Name ,data.Question.Section , data.Question.Position,data.Question.Title,data.Question.TitleSpanish,data.Question.SubmitedValue,data.Question.SpanishSubmitedValue,data.Question.Des,data.Question.Ans,data.Question.ViewType,data.Question.ParentID,data.Question.IsRequired,data.Question.IsSubmitField,data.Question.IsActive)
+// results, err := appdatabase.Query("SELECT LAST_INSERT_ID()")
+// if err != nil {
+// panic(err.Error())
+// }
+// for results.Next() {
+// var tag Tag
+// err = results.Scan(&tag.ID)
+// if err != nil {
+// panic(err.Error())
+// }
+// arr=tag.ID
+// }
+// for i:=0;i<=1;i++{
+// _, err = appdatabase.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?, ?, ?,?,?,?,?,?,?,?,?,?,?,?)",data.Options[i].Name ,data.Options[i].Section , data.Options[i].Position,data.Options[i].Title,data.Options[i].TitleSpanish,data.Options[i].SubmitedValue,data.Options[i].SpanishSubmitedValue,data.Options[i].Des,data.Options[i].Ans,data.Options[i].ViewType,arr,data.Options[i].IsRequired,data.Options[i].IsSubmitField,data.Options[i].IsActive)
+// }
+//
+// // }else {
+// //
+// // _, err= appdatabase.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", data.Question.Name ,data.Question.Section , data.Question.Position,data.Question.Title,data.Question.TitleSpanish,data.Question.SubmitedValue,data.Question.SpanishSubmitedValue,data.Question.Des,data.Question.Ans,data.Question.ViewType,data.Question.ParentID,data.Question.IsRequired,data.Question.IsSubmitField,data.Question.IsActive)
+// // _, err = appdatabase.Exec("INSERT INTO input_types(messgae,messageSpanish,regx,format) VALUES(?,?,?,?)",data.Validation.Messgae,data.Validation.MessageSpanish,data.Validation.Regx,data.Validation.Format)
+// //
+// // }
+//
+// }
 return err
 }
 
