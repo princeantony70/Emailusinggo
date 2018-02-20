@@ -14,10 +14,6 @@ var appdatabase *sql.DB
 var err error
 var arr int
 
-type Tag struct {
-	ID int `json:"id"`
-}
-
 type Questions struct {
 	Question struct {
 		Name                 string `json:"name"`
@@ -56,6 +52,10 @@ type Questions struct {
 		Regx           string `json:"regx"`
 		Format         string `json:"format"`
 	} `json:"validation"`
+}
+
+type Tag struct {
+	ID int `json:"id"`
 }
 
 func insertInDatabase(data Questions) error {
@@ -131,16 +131,9 @@ func userAddHandler(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	appdatabase, err = sql.Open("mysql", "root:nfn@/api")
-	if err != nil {
-		fmt.Println("db error ")
-	}
-	err = appdatabase.Ping()
-	if err != nil {
-		fmt.Println("ping error")
-	}
 }
 
 func main() {
 	http.HandleFunc("/add", userAddHandler)
-	http.ListenAndServe(":7077", nil)
+	http.ListenAndServe(":7082", nil)
 }

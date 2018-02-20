@@ -62,9 +62,15 @@ type Questions struct {
 
 func insertInDatabase(data Questions) error  {
 
-  //zeroOptions := data.Options{}
-  //zeroValidation := data.Vaidation{}
-fmt.Println("hello")
+fmt.Println("going to print the datas ")
+if len(data.Options) > 0{
+  fmt.Println(data.Options)
+}else{
+  fmt.Println(data.Question)
+}
+
+
+
 // if len(data.Options > 0) {
 //
 // _, err= appdatabase.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", data.Question.Name ,data.Question.Section , data.Question.Position,data.Question.Title,data.Question.TitleSpanish,data.Question.SubmitedValue,data.Question.SpanishSubmitedValue,data.Question.Des,data.Question.Ans,data.Question.ViewType,data.Question.ParentID,data.Question.IsRequired,data.Question.IsSubmitField,data.Question.IsActive)
@@ -166,6 +172,6 @@ if err !=nil{
 func main(){
   http.HandleFunc("/useradd", userAddHandler)
   log.Println("server is up on the port ")
-  http.ListenAndServe(":8095", nil)
+  http.ListenAndServe(":9021", nil)
 
 }
