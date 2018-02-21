@@ -66,7 +66,6 @@ func (u userAddHandler) insertInDatabase(data Questions) error {
 
 _, err = u.db.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?, ?, ?,?,?,?,?,?,?,?,?,?,?,?)", data.Question.Name, data.Question.Section, data.Question.Position, data.Question.Title, data.Question.TitleSpanish, data.Question.SubmitedValue, data.Question.SpanishSubmitedValue, data.Question.Des, data.Question.Ans, data.Question.ViewType, data.Question.ParentID, data.Question.IsRequired, data.Question.IsSubmitField, data.Question.IsActive)
 
-
 if len(data.Options) > 0 {
   results, err := db.Query("SELECT LAST_INSERT_ID()")
     if err != nil {
@@ -85,7 +84,7 @@ if len(data.Options) > 0 {
     for i:=0;i<=1;i++{
 		_, err  = u.db.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?, ?, ?,?,?,?,?,?,?,?,?,?,?,?)", data.Options[i].Name, data.Options[i].Section, data.Options[i].Position, data.Options[i].Title, data.Options[i].TitleSpanish, data.Options[i].SubmitedValue, data.Options[i].SpanishSubmitedValue, data.Options[i].Des, data.Options[i].Ans, data.Options[i].ViewType, arr, data.Options[i].IsRequired, data.Options[i].IsSubmitField, data.Options[i].IsActive)
     }
-  }else {
+  }else if data.Validation.Messgae != "" {
     _, err = u.db.Exec("INSERT INTO input_types(messgae,messageSpanish,regx,format) VALUES(?,?,?,?)",data.Validation.Messgae,data.Validation.MessageSpanish,data.Validation.Regx,data.Validation.Format)
   }
 
@@ -124,5 +123,5 @@ db, err = sql.Open("mysql", "root:nfn@tcp(127.0.0.1:3306)/api")
 
 
 	http.Handle("/add", handler)
-	http.ListenAndServe(":1248", nil)
+	http.ListenAndServe(":1250", nil)
 }
