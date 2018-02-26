@@ -8,9 +8,8 @@ import (
 	_ "io/ioutil"
 	"log"
 	"net/http"
-	"os"
-)
 
+)
 
 type Tag struct {
 	ID int `json:"id"`
@@ -56,6 +55,20 @@ type Questions struct {
 	} `json:"validation"`
 }
 
+
+type Response struct {
+	Status  bool        `json:"status"`
+	Types   interface{}  `json:"types"`
+	//Value   interface{} `json:"value"`   //Replace this with your actual type
+	Formula interface{} `json:"formula"` //Replace this with your actual type
+}
+
+type Validation struct{
+	Format string `json:"format"`
+	Regx   string  `json:"regx"`
+}
+
+
 type userAddHandler struct {
 	db *sql.DB
 }
@@ -66,18 +79,18 @@ type userGetHandler struct {
 
 func (u userAddHandler) insertInDatabase(data Questions) error {
 
-	results, err := u.db.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?, ?, ?,?,?,?,?,?,?,?,?,?,?,?)", data.Question.Name, data.Question.Section, data.Question.Position, data.Question.Title, data.Question.TitleSpanish, data.Question.SubmitedValue, data.Question.SpanishSubmitedValue, data.Question.Des, data.Question.Ans, data.Question.ViewType, data.Question.ParentID, data.Question.IsRequired, data.Question.IsSubmitField, data.Question.IsActive)
-	if err != nil {
-		return err
-	}
-	if len(data.Options) > 0 {
+results, err := u.db.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?, ?, ?,?,?,?,?,?,?,?,?,?,?,?)", data.Question.Name, data.Question.Section, data.Question.Position, data.Question.Title, data.Question.TitleSpanish, data.Question.SubmitedValue, data.Question.SpanishSubmitedValue, data.Question.Des, data.Question.Ans, data.Question.ViewType, data.Question.ParentID, data.Question.IsRequired, data.Question.IsSubmitField, data.Question.IsActive)
+if err != nil {
+	return err
+}
+if len(data.Options) > 0 {
 
-	lastInsertId , err := results.LastInsertId()
-	if err != nil {
-		return err
-	}
+lastInsertId , err := results.LastInsertId()
+if err != nil {
+return err
+}
 
-	for _, option := range data.Options {
+for _, option := range data.Options {
 		_, err = u.db.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?, ?, ?,?,?,?,?,?,?,?,?,?,?,?)",
 				   option.Name,
 				   option.Section,
@@ -93,12 +106,11 @@ func (u userAddHandler) insertInDatabase(data Questions) error {
 				   option.IsRequired,
 				   option.IsSubmitField,
 				   option.IsActive)
-		if err != nil {
-			return err
-		}
-
-	}
-	}else if data.Validation.Messgae != "" {
+if err != nil {
+		return err
+}
+}
+}else if data.Validation.Messgae != "" {
 		_, err = u.db.Exec("INSERT INTO input_types(messgae,messageSpanish,regx,format) VALUES(?,?,?,?)", data.Validation.Messgae, data.Validation.MessageSpanish, data.Validation.Regx, data.Validation.Format)
 	}
 
@@ -106,93 +118,75 @@ func (u userAddHandler) insertInDatabase(data Questions) error {
 }
 
 func (u userAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	dec := json.NewDecoder(r.Body)
-	defer r.Body.Close()
+dec := json.NewDecoder(r.Body)
+defer r.Body.Close()
 
-	var k Questions
-	if err := dec.Decode (&k); err != nil {
-		fmt.Println("unmarshall error ", err)
-	}
-
-	if err := u.insertInDatabase(k); err != nil {
-		fmt.Fprintln(w, err.Error())
-		return
-	}
-	// no need for extra casting
-	fmt.Fprintln(w, `{"code ":"success"}`)
+var k Questions
+if err := dec.Decode (&k); err != nil {
+	fmt.Println("unmarshall error ", err)
 }
+
+if err := u.insertInDatabase(k); err != nil {
+	fmt.Fprintln(w, err.Error())
+return
+}
+	// no need for extra casting
+
+fmt.Fprintln(w, `{"code ":"success"}`)
+}
+
+
 
 func (v userGetHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	type Validation struct {
-		Regx   string `json:"regx"`
-		Format string `json:"format"`
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-
-
-	rows, err := v.db.Query("SELECT  DISTINCT regx  FROM input_types")
-	if err != nil {
-		panic(err)
-	}
-	defer rows.Close()
-	enc := json.NewEncoder(w)
-	for rows.Next() {
-		validation := Validation{}
-		err = rows.Scan(&validation.Regx)
-
-		if err != nil {
-			fmt.Println("failed to scan validation data", err)
-		}
-		//w.Write([]byte(`{"status":"true"}`))
-
-		json.NewEncoder(os.Stdout).Encode(validation)
-    //fmt.Fprintln( w,`{"code ":"success"}`)
-    //fmt.Fprintln(w, `"value ":`)
-    //fmt.Fprintln(w, `"types":["`)
-
-     enc.Encode(validation.Regx)
-	 }
- 	if err != nil {
- 		panic(err)
- 	}
 
 
 
-		 rf, err := v.db.Query("SELECT  DISTINCT format  FROM input_types")
-		 if err != nil {
-		 	panic(err)
-		 }
-		 defer rows.Close()
-		 enco := json.NewEncoder(w)
-		 for rf.Next() {
-		 	validation := Validation{}
-		 	err = rf.Scan(&validation.Format)
-
-		 	if err != nil {
-		 		fmt.Println("failed to scan validation data format", err)
-		 	}
-		 	//w.Write([]byte(`{"status":"true"}`))
-
-		 	json.NewEncoder(os.Stdout).Encode(validation)
-		 	//fmt.Fprintln( w,`{"code ":"success"}`)
-		 	//fmt.Fprintln(w, `"value ":`)
-		 	//fmt.Fprintln(w, `"types":["`
-
-		 enco.Encode(validation.Format)
-
-     //fmt.Fprintln(w, `],`)
-     //fmt.Fprintln(w, `"formula":[`)
-     //enc.Encode(validation.Format)
-     //fmt.Fprintln(w, `]`)
-     //fmt.Fprintln(w, `}`)
-     //fmt.Fprintln(w, `}`)
-	}
-	if err != nil {
-		panic(err)
-	}
+rows, err := v.db.Query("SELECT  DISTINCT format  FROM input_types")
+if err != nil {
+panic(err)
 }
+formulas := make([]string, 0, 8) // This creates a slice of strings with a capacity of 8 and length of 0.
+defer rows.Close()
+for rows.Next() {
+validation := Validation{}
+err = rows.Scan(&validation.Format)
+if err != nil {
+fmt.Println("failed to scan validation data", err)
+}
+formulas = append(formulas, validation.Format) // This appends the formula to the slice of formulas.
+fmt.Println(formulas)
+}
+
+rf, err := v.db.Query("SELECT  DISTINCT regx  FROM input_types")
+if err != nil {
+panic(err)
+}
+types := make([]string, 0, 8) // This creates a slice of strings with a capacity of 8 and length of 0.
+defer rows.Close()
+for rf.Next() {
+validation := Validation{}
+err = rf.Scan(&validation.Regx)
+if err != nil {
+	fmt.Println("failed to scan validation data ", err)
+}
+types = append(types, validation.Regx) // This appends the formula to the slice of formulas.
+fmt.Println(types)
+}
+
+	//values := validation.Format   //Do some SQL queries to get response here
+	//formulas := validation.Regx// Do some SQL queries to get response here
+	response := Response{
+		Status:  true,
+		Types:   formulas,
+		Formula: types,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	encoder.Encode(response)
+     }
+
+
 
 func main() {
 	db, err := sql.Open("mysql", "root:nfn@tcp(127.0.0.1:3306)/shift_pixy")
@@ -215,5 +209,5 @@ func main() {
 
 	http.Handle("/add", handler)
 	http.Handle("/get", handler2)
-	http.ListenAndServe(":1306", nil)
+	http.ListenAndServe(":1338", nil)
 }
