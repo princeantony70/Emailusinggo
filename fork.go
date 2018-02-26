@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	//"io/ioutil"
+	_ "io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -70,10 +70,13 @@ func (u userAddHandler) insertInDatabase(data Questions) error {
 	if err != nil {
 		return err
 	}
+	if len(data.Options) > 0 {
+
 	lastInsertId , err := results.LastInsertId()
 	if err != nil {
 		return err
 	}
+
 	for _, option := range data.Options {
 		_, err = u.db.Exec("INSERT INTO profile_questions(name, section, position,title,titleSpanish,submited_value,spanish_submited_value,des,ans,view_type,parent_id,isRequired,is_submit_field,is_active) VALUES(?, ?, ?,?,?,?,?,?,?,?,?,?,?,?)",
 				   option.Name,
@@ -95,7 +98,7 @@ func (u userAddHandler) insertInDatabase(data Questions) error {
 		}
 
 	}
-	if data.Validation.Messgae != "" {
+	}else if data.Validation.Messgae != "" {
 		_, err = u.db.Exec("INSERT INTO input_types(messgae,messageSpanish,regx,format) VALUES(?,?,?,?)", data.Validation.Messgae, data.Validation.MessageSpanish, data.Validation.Regx, data.Validation.Format)
 	}
 
@@ -127,7 +130,9 @@ func (v userGetHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	rows, err := v.db.Query(`SELECT regx, format FROM input_types`)
+
+
+	rows, err := v.db.Query("SELECT  DISTINCT regx  FROM input_types")
 	if err != nil {
 		panic(err)
 	}
@@ -135,27 +140,62 @@ func (v userGetHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	for rows.Next() {
 		validation := Validation{}
-		err = rows.Scan(&validation.Regx, &validation.Format)
+		err = rows.Scan(&validation.Regx)
 
 		if err != nil {
 			fmt.Println("failed to scan validation data", err)
-
 		}
+		//w.Write([]byte(`{"status":"true"}`))
+
 		json.NewEncoder(os.Stdout).Encode(validation)
+    //fmt.Fprintln( w,`{"code ":"success"}`)
+    //fmt.Fprintln(w, `"value ":`)
+    //fmt.Fprintln(w, `"types":["`)
 
-		enc.Encode(validation)
+     enc.Encode(validation.Regx)
+	 }
+ 	if err != nil {
+ 		panic(err)
+ 	}
 
+
+
+		 rf, err := v.db.Query("SELECT  DISTINCT format  FROM input_types")
+		 if err != nil {
+		 	panic(err)
+		 }
+		 defer rows.Close()
+		 enco := json.NewEncoder(w)
+		 for rf.Next() {
+		 	validation := Validation{}
+		 	err = rf.Scan(&validation.Format)
+
+		 	if err != nil {
+		 		fmt.Println("failed to scan validation data format", err)
+		 	}
+		 	//w.Write([]byte(`{"status":"true"}`))
+
+		 	json.NewEncoder(os.Stdout).Encode(validation)
+		 	//fmt.Fprintln( w,`{"code ":"success"}`)
+		 	//fmt.Fprintln(w, `"value ":`)
+		 	//fmt.Fprintln(w, `"types":["`
+
+		 enco.Encode(validation.Format)
+
+     //fmt.Fprintln(w, `],`)
+     //fmt.Fprintln(w, `"formula":[`)
+     //enc.Encode(validation.Format)
+     //fmt.Fprintln(w, `]`)
+     //fmt.Fprintln(w, `}`)
+     //fmt.Fprintln(w, `}`)
 	}
-
 	if err != nil {
 		panic(err)
 	}
-
 }
 
 func main() {
-
-	db, err := sql.Open("mysql", "root:nfn@tcp(127.0.0.1:3306)/api")
+	db, err := sql.Open("mysql", "root:nfn@tcp(127.0.0.1:3306)/shift_pixy")
 	if err != nil {
 		log.Fatalf("failed to open db: %s", err)
 	}
@@ -175,5 +215,5 @@ func main() {
 
 	http.Handle("/add", handler)
 	http.Handle("/get", handler2)
-	http.ListenAndServe(":1273", nil)
+	http.ListenAndServe(":1306", nil)
 }
