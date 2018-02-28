@@ -8,7 +8,6 @@ import (
 	_ "io/ioutil"
 	"log"
 	"net/http"
-
 )
 
 type Tag struct {
@@ -56,12 +55,22 @@ type Questions struct {
 }
 
 
+// type Response struct {
+// 	Status  bool        `json:"status"`
+// 	Types   interface{}  `json:"types"`
+// 	Formula interface{} `json:"formula"` //Replace this with your actual type
+// }
+// */
 type Response struct {
-	Status  bool        `json:"status"`
-	Types   interface{}  `json:"types"`
-	//Value   interface{} `json:"value"`   //Replace this with your actual type
-	Formula interface{} `json:"formula"` //Replace this with your actual type
+	Status bool `json:"status"`
+	Value        `json:"value"`
 }
+
+type	Value  struct {
+		Types   []string `json:"types"`
+		Formula []string `json:"formula"`
+	}
+
 
 type Validation struct{
 	Format string `json:"format"`
@@ -146,7 +155,7 @@ rows, err := v.db.Query("SELECT  DISTINCT format  FROM input_types")
 if err != nil {
 panic(err)
 }
-formulas := make([]string, 0, 8) // This creates a slice of strings with a capacity of 8 and length of 0.
+types := make([]string, 0, 8) // This creates a slice of strings with a capacity of 8 and length of 0.
 defer rows.Close()
 for rows.Next() {
 validation := Validation{}
@@ -154,15 +163,15 @@ err = rows.Scan(&validation.Format)
 if err != nil {
 fmt.Println("failed to scan validation data", err)
 }
-formulas = append(formulas, validation.Format) // This appends the formula to the slice of formulas.
-fmt.Println(formulas)
+types = append(types, validation.Format) // This appends the formula to the slice of formulas.
+//fmt.Println(types)
 }
 
 rf, err := v.db.Query("SELECT  DISTINCT regx  FROM input_types")
 if err != nil {
 panic(err)
 }
-types := make([]string, 0, 8) // This creates a slice of strings with a capacity of 8 and length of 0.
+formulas := make([]string, 0, 8) // This creates a slice of strings with a capacity of 8 and length of 0.
 defer rows.Close()
 for rf.Next() {
 validation := Validation{}
@@ -170,17 +179,20 @@ err = rf.Scan(&validation.Regx)
 if err != nil {
 	fmt.Println("failed to scan validation data ", err)
 }
-types = append(types, validation.Regx) // This appends the formula to the slice of formulas.
-fmt.Println(types)
+formulas = append(formulas, validation.Regx) // This appends the formula to the slice of formulas.
+//fmt.Println(formulas)
 }
 
 	//values := validation.Format   //Do some SQL queries to get response here
 	//formulas := validation.Regx// Do some SQL queries to get response here
 	response := Response{
 		Status:  true,
-		Types:   formulas,
-		Formula: types,
-	}
+		Value :Value{
+		Types:   types ,
+		Formula: formulas,
+	},
+}
+
 	w.Header().Set("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
 	encoder.Encode(response)
@@ -209,5 +221,5 @@ func main() {
 
 	http.Handle("/add", handler)
 	http.Handle("/get", handler2)
-	http.ListenAndServe(":1338", nil)
+	http.ListenAndServe(":1349", nil)
 }
