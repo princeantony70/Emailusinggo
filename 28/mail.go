@@ -1,18 +1,33 @@
 package main
 
+
 import (
 	"log"
 	"net/smtp"
+  "encoding/json"
 )
 
 func main() {
-	send("hello there")
+http.Handle("/send",send)
+send("hello there")
 }
 
+
+
+
+// type  Request struct{
+// 	From    string  `json:"from"`
+// 	Password string `json:"password"`
+// 	To      string  `json:"to"`
+// 	Message string  `json:"message"`
+// }
+
+
 func send(body string) {
-	from := "princemcet@gmail.com"
+
+  from := "princemcet@gmail.com"
 	pass := "14bit035"
-	to := "kchandruk7@gmail.com"
+	to := "ravicse28@gmail.com"
 
 	msg := "From: " + from + "\n" +
 		"To: " + to + "\n" +
